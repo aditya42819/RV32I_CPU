@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1786804099" />
+    <testcase name="test_regfile" classname="test_regfile" file="C:/Users/Saravana Srinivasan/RV32I_CPU/tb/regfile/test_regfile.py" lineno="6" time="0.015860319137573242" sim_time_ns="21.0" ratio_time="1324.0591073763962" />
+  </testsuite>
+</testsuites>
