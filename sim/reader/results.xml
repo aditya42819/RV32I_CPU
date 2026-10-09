@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1788183633" />
+    <testcase name="test_reader" classname="test_reader" file="C:/Users/Saravana Srinivasan/RV32I_CPU/tb/reader/test_reader.py" lineno="12" time="0.006008625030517578" sim_time_ns="11.0" ratio_time="1830.7016903420363" />
+  </testsuite>
+</testsuites>
