@@ -1,0 +1,8 @@
+# Generated simulation output
+build/
+__pycache__/
+results.xml
+*.vcd
+*.fst
+*.vvp
+*.pyc
