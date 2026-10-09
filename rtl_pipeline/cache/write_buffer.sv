@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 module write_buffer #(
-    parameter DEPTH = 16
+    parameter DEPTH = 4
 )(
     input  logic        clk, rst_n,
     input  logic        push,
@@ -21,8 +21,8 @@ module write_buffer #(
     input  logic [1:0]  m_bresp,
     output logic        m_bready
 );
-    localparam PTR_W = 4;   // log2(16)
-    localparam CNT_W = 5;   // log2(16)+1
+    localparam PTR_W = 2;   // log2(4)
+    localparam CNT_W = 3;   // log2(4)+1
 
     logic [31:0] addr_q [0:DEPTH-1];
     logic [31:0] data_q [0:DEPTH-1];
@@ -33,7 +33,6 @@ module write_buffer #(
     assign full  = (count == DEPTH);
     assign empty = (count == 0);
 
-    // AXI write: single-beat from head of FIFO
     assign m_awaddr  = addr_q[rd_ptr];
     assign m_awvalid = !empty;
     assign m_wdata   = data_q[rd_ptr];
