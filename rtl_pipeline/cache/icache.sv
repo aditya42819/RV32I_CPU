@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 module icache #(
-    parameter NUM_SETS=16, parameter NUM_WAYS=4, parameter LINE_WORDS=4
+    parameter NUM_SETS=8, parameter NUM_WAYS=2, parameter LINE_WORDS=4
 )(
     input  logic clk, rst_n,
     input  logic core_req,
@@ -65,19 +65,22 @@ module icache #(
     logic [31:0] miss_line_r;
     logic [1:0]  victim_r, fill_cnt;
     logic [31:0] fill_buf [LINE_WORDS];
+    logic [31:0] core_rdata_r;  logic core_rvalid_r;
 
     wire read_miss = (state==S_IDLE) && core_req && !hit;
     assign core_stall = read_miss || (state != S_IDLE);
-    assign core_rdata = hit_data;   // COMBINATIONAL — always in sync with core_addr
-    assign core_rvalid = hit;
+    assign core_rdata = core_rdata_r;  assign core_rvalid = core_rvalid_r;
 
     always_ff @(posedge clk) begin
-        if (!rst_n) begin state <= S_IDLE; fill_cnt <= 0; end
+        if (!rst_n) begin state <= S_IDLE; core_rvalid_r <= 0; fill_cnt <= 0; end
         else begin
+            core_rvalid_r <= 1'b0;
             case (state)
                 S_IDLE: begin
-                    if (core_req && hit)
+                    if (core_req && hit) begin
+                        core_rdata_r <= hit_data;  core_rvalid_r <= 1'b1;
                         plru_mem[req_index] <= plru_update(plru_mem[req_index], hit_way);
+                    end
                     else if (read_miss) begin
                         miss_tag_r <= req_tag;  miss_index_r <= req_index;
                         miss_word_r <= req_word; miss_line_r <= req_line;
@@ -95,6 +98,7 @@ module icache #(
                     tag_mem[miss_index_r][victim_r]   <= miss_tag_r;
                     valid_mem[miss_index_r][victim_r] <= 1'b1;
                     plru_mem[miss_index_r] <= plru_update(plru_mem[miss_index_r], victim_r);
+                    core_rdata_r <= fill_buf[miss_word_r];  core_rvalid_r <= 1'b1;
                     state <= S_IDLE;
                 end
             endcase
