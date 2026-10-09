@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1788296737" />
+    <testcase name="test_rv32i_cpu_integration" classname="test_cpu" file="C:/Users/Saravana Srinivasan/RV32I_CPU/tb/cpu/test_cpu.py" lineno="15" time="0.02449321746826172" sim_time_ns="161.0" ratio_time="6573.248296538566" />
+  </testsuite>
+</testsuites>
