@@ -1,0 +1,4 @@
+400000B7  // lui x1, 0x40000   (Load address 0x40000000 into x1)
+00500113  // addi x2, x0, 5    (Load value 5 (binary 0101) into x2)
+0020A023  // sw x2, 0(x1)      (STORE x2 to address in x1 -> Lights up LEDs!)
+00000013  // nop               (Infinite loop)
