@@ -48,7 +48,7 @@ The expected results are x1=5, x2=10, x3=15, data memory word 0=15, and x4=15. T
 |---|---|
 | ![Pipeline execution waveform](docs/assets/waveform-smoke-test.png) | ![Data-memory waveform](docs/assets/waveform-memory.png) |
 
-The repository has test material from more than one stage of development. The older ISA Makefile targets the earlier CPU; the pipelined testbench is a separate path. Follow [Verification notes](docs/verification.md) to understand the distinction and the current limits on reproducibility.
+The repository preserves test flows from multiple stages. The single-cycle integration harness under `tb/cpu/` uses Cocotb with Icarus and checks selected register and data-memory values after 15 cycles. The `tb/ISA_TESTS/Makefile` is another legacy flow for `rtl/cpu.sv`, while `tb/ISA_TESTS/tb_isa.sv` is a standalone pipeline-oriented bench with AXI BRAM models and `+HEX` / `+EXP` inputs. The six-word waveform test shown above used a separate `tb_riscv.sv` and `my_test.hex` from the development session; those exact files are not currently checked into this repository, so the screenshots are visible evidence but that specific run is not yet fully reproducible from the repo. See [Verification notes](docs/verification.md).
 
 ## FPGA implementation snapshot
 
