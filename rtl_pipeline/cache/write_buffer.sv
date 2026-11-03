@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 module write_buffer #(
-    parameter DEPTH = 4
+    parameter DEPTH = 16
 )(
     input  logic        clk, rst_n,
     input  logic        push,
