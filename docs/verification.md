@@ -1,32 +1,28 @@
 # Verification notes
 
-This project has verification material from more than one development stage. Keep the single-cycle tests, pipeline testbench, and later directed waveform run distinct: they use different testbenches and different CPU variants.
+## Official RISC-V ISA verification
 
-## 1. Single-cycle integration check
+The project owner reports running the **official RISC-V ISA verification tests**. This is a distinct verification activity from the repository's own directed test programs and waveform captures.
 
-The Cocotb setup in `tb/cpu/` selects the earlier `rtl/cpu.sv` implementation through `cpu_harness.sv`. Its Makefile uses Icarus Verilog and Cocotb. The checked-in test resets the design, runs 15 rising edges, and then asserts selected state:
+The current repository does not include the official test suite version/name, target configuration, run command, or a pass/fail transcript. Therefore the official run is an author-reported result, not an independently reproducible result from the files currently checked in. To make it auditable, add the suite/version and configuration, the exact core variant/source list, the command or script, and the unedited summary showing which tests passed or failed.
 
-- x3 = `0x00000080`
-- x5 = `0x00000123`
-- x8 = `30`
-- x9 = `30`
-- x10 = `2`
-- data-memory index 16 = `0x01238000`
-- data-memory index 17 = `30`
+Do not mistake `tb/ISA_TESTS/test_rv32i_full.S` for the official suite. It is a project-directed assembly program. It checks SLL/SRL/SRA, JAL/JALR control flow, and LW/LH/LB/LHU/LBU data-width and extension behavior through a memory signature. Separate directed programs in the same directory cover arithmetic, branches, jumps, cache, and pipeline components. The Makefile in that directory selects the older `rtl/cpu.sv` CPU; it does not select `rtl_pipeline/cpu.sv`.
 
-This checks an integrated instruction/data path against concrete expected state. It is a test definition in the repository; the source files alone do not tell us which revision or whether that exact test was run in the user's final verification session.
+## Single-cycle integration tests
 
-A second legacy setup, `tb/ISA_TESTS/Makefile`, also compiles `rtl/cpu.sv` with `tb_top.sv`. The testbench loads `test_rv32i_full_clean.hex`, while its Cocotb test watches data writes for a termination word (`0xDEADBEEF` at `0x0FFC`) and checks a memory signature covering shifts, jumps, and signed/unsigned loads. Again, it belongs to the earlier `rtl/cpu.sv` path, not the pipelined core.
+The Cocotb setup under `tb/cpu/` selects `rtl/cpu.sv` through `cpu_harness.sv`. Its checked-in test resets the processor, runs 15 clock cycles, then asserts values in x3, x5, x8, x9, x10 and data-memory words 16 and 17.
 
-## 2. Pipeline-oriented testbench
+The legacy `tb/ISA_TESTS/Makefile` also targets `rtl/cpu.sv` and `tb_top.sv`. The associated signature test waits for a termination write and checks expected memory values. These are test definitions and historical run artifacts; they should not be presented as proof that the pipeline implementation passed the official suite.
 
-`tb/ISA_TESTS/tb_isa.sv` is a separate SystemVerilog testbench for the pipeline CPU. It connects AXI BRAM slave models to the instruction and data sides, takes instruction and expected-register files through `+HEX` and `+EXP`, records debug writeback into a shadow register file, then compares x1–x31 against the expected values after 60 clock cycles.
+## Pipeline-oriented testbench
 
-This bench requires the pipelined CPU and its dependencies from `rtl_pipeline/`. Do not combine `rtl/cpu.sv` and `rtl_pipeline/cpu.sv` in one build: both declare a module named `cpu`. The legacy Makefiles under `tb/cpu/` and `tb/ISA_TESTS/` explicitly select `rtl/cpu.sv`; they are not build commands for the pipeline design.
+`tb/ISA_TESTS/tb_isa.sv` is a separate SystemVerilog bench that instantiates the pipeline CPU with AXI BRAM slave models. It loads a program via `+HEX`, loads expected register values via `+EXP`, records debug writeback into a shadow register file, and compares x1–x31 after 60 cycles. It is separate from the older Makefiles and is not itself an official-suite pass log.
 
-## 3. Directed pipeline waveform run
+Never compile both CPU variants together: each declares a module named `cpu`.
 
-The screenshots supplied for this project show a separate directed simulation using the following six instruction words:
+## Directed waveform run
+
+The supplied six-word waveform program was:
 
 ```text
 00500093
@@ -37,18 +33,18 @@ The screenshots supplied for this project show a separate directed simulation us
 0000006f
 ```
 
-The sequence is `addi x1, x0, 5`; `addi x2, x0, 10`; `add x3, x1, x2`; `sw x3, 0(x0)`; `lw x4, 0(x0)`; and `jal x0, 0`. The expected results are x1=5, x2=10, x3=15, the word at data-memory byte address 0=15, and x4=15. The user reports resolving the earlier x3 issue and verifying the run. The two included waveform images are the visual records supplied for that directed test.
+It performs two ADDIs, an ADD with dependent operands, a store, a load, and a self-looping JAL. Expected results are x1=5, x2=10, x3=15, memory word 0=15, and x4=15. The project owner reports resolving the x3 issue and verifying this run; the two included waveform images are the supplied visual evidence.
 
-The specific `tb_riscv.sv` and `my_test.hex` files used for that run were discussed in the project chat but are not present in the current repository tree. Including those exact files, their simulator command, and an automated pass/fail assertion would make this particular waveform run reproducible from a clean checkout.
+The specific `tb_riscv.sv` and `my_test.hex` files used for this run are not in the current repository. Include those exact files and a machine-checked pass/fail check if this run should be reproducible from a clean checkout.
 
-## 4. FPGA implementation report snapshots
+## Vivado snapshot and FPGA wrapper
 
-The supplied Vivado screenshots show device `xc7a100tcsg324-1`, post-synthesis estimates of 3,774 LUTs, 64 LUTRAMs, and 7,350 flip-flops, and post-implementation utilization of 3,706 LUTs, 62 LUTRAMs, 7,350 flip-flops, 6 I/Os, and 1 BUFG. The screenshot shows setup WNS +0.191 ns, TNS 0 ns, no failing endpoints, and estimated on-chip power 0.118 W.
+The supplied Vivado screenshots show part `xc7a100tcsg324-1`, post-synthesis estimates of 3,774 LUTs, 64 LUTRAMs, and 7,350 flip-flops, and post-implementation use of 3,706 LUTs, 62 LUTRAMs, 7,350 flip-flops, 6 I/Os, and 1 BUFG. The summary reports WNS +0.191 ns, TNS 0 ns, 0 failing endpoints, and estimated on-chip power 0.118 W.
 
-These are report snapshots. They do not show the exact source commit, Vivado version, project settings, or full constraints, so the figures are not independently reproducible from the images alone.
+The checked-in `top.sv` ties instruction read data to NOP and D-cache read data to zero, and stubs the read-channel handshake signals. The FPGA video therefore documents board/wrapper bring-up, not the processor executing the official ISA suite or the six-word program from real instruction memory.
+
+Because the read paths are tied off, Vivado may have optimized away portions of the caches or core. Treat these figures as a snapshot of the configured wrapper/project, not as area/timing for the complete memory-connected CPU. A new implementation with real memories connected is needed for that claim.
 
 ## Scope
 
-The single-cycle integration checks, the pipeline testbench, the directed waveform program, and the Vivado reports demonstrate different parts of the project. The six-word waveform test is targeted evidence for the instructions and memory behavior in that program; it is not exhaustive RV32I compliance or formal verification.
-
-The checked-in FPGA wrapper `top.sv` ties instruction data to `32'h00000013` (NOP) and D-cache read data to zero. The FPGA video therefore documents board bring-up/activity, not execution of the six-word simulation program from an on-board instruction memory.
+Official suite execution, project-directed tests, pipeline waveform inspection, and FPGA implementation are different evidence types. Keep their core variant, test program, command, and result separate when describing verification. None of the current artifacts establishes formal verification or full RV32I certification of the pipelined core.
