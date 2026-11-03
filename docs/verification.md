@@ -4,7 +4,9 @@
 
 The project owner reports running the **official RISC-V ISA verification tests**. This is a distinct verification activity from the repository's own directed test programs and waveform captures.
 
-The current repository does not include the official test suite version/name, target configuration, run command, or a pass/fail transcript. Therefore the official run is an author-reported result, not an independently reproducible result from the files currently checked in. To make it auditable, add the suite/version and configuration, the exact core variant/source list, the command or script, and the unedited summary showing which tests passed or failed.
+The pipeline ISA testbench **is checked in** at `tb/ISA_TESTS/tb_isa.sv`. It connects AXI BRAM slave models, accepts an instruction image through `+HEX` and expected register values through `+EXP`, records debug writeback into a shadow register file, and compares x1–x31 after 60 cycles. This is the pipeline-level ISA test path in the repository.
+
+The project owner reports running the official RISC-V ISA verification tests. The current repository does not include the official suite version/name, target configuration, run command, or pass/fail transcript, so the testbench is present but the official run is not independently auditable from the checked-in files. To make it reproducible, include the suite/version and configuration, the exact test image and core source list, the run command or script, and the unedited pass/fail summary.
 
 Do not mistake `tb/ISA_TESTS/test_rv32i_full.S` for the official suite. It is a project-directed assembly program. It checks SLL/SRL/SRA, JAL/JALR control flow, and LW/LH/LB/LHU/LBU data-width and extension behavior through a memory signature. Separate directed programs in the same directory cover arithmetic, branches, jumps, cache, and pipeline components. The Makefile in that directory selects the older `rtl/cpu.sv` CPU; it does not select `rtl_pipeline/cpu.sv`.
 
@@ -16,7 +18,7 @@ The legacy `tb/ISA_TESTS/Makefile` also targets `rtl/cpu.sv` and `tb_top.sv`. Th
 
 ## Pipeline-oriented testbench
 
-`tb/ISA_TESTS/tb_isa.sv` is a separate SystemVerilog bench that instantiates the pipeline CPU with AXI BRAM slave models. It loads a program via `+HEX`, loads expected register values via `+EXP`, records debug writeback into a shadow register file, and compares x1–x31 after 60 cycles. It is separate from the older Makefiles and is not itself an official-suite pass log.
+`tb/ISA_TESTS/tb_isa.sv` is the pipeline-oriented ISA bench described above. It is separate from the older Makefiles and is a testbench, not itself a pass log. The evidence needed to show which official suite cases passed remains a run transcript or generated pass/fail table.
 
 Never compile both CPU variants together: each declares a module named `cpu`.
 

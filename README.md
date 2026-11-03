@@ -33,7 +33,9 @@ The drawing is intentionally a full system overview. Some labels describe logica
 
 I ran the **official RISC-V ISA verification tests** as part of this project. This is a separate and important part of my verification work, alongside the project’s own directed programs and waveform debugging.
 
-The current repository snapshot does not yet include the official suite’s exact name/version, configuration, run command, or pass/fail log. So this records my reported verification result, but a reader cannot independently reproduce or audit that run from the repo yet. The checked-in `tb/ISA_TESTS/test_rv32i_full.S` is a project-directed test program, not the official suite. It exercises shifts, JAL/JALR, and word/halfword/byte loads with signed and unsigned extension; companion directed tests cover other paths. See [Verification notes](docs/verification.md) for how these test flows differ and what evidence is currently checked in.
+The pipeline ISA testbench is checked in at [`tb/ISA_TESTS/tb_isa.sv`](tb/ISA_TESTS/tb_isa.sv). It connects AXI BRAM memory models, loads a program with `+HEX`, loads expected register values with `+EXP`, records register writeback, and compares x1–x31 with the expected register file. This is the repo’s pipeline-level ISA test path.
+
+I also ran the **official RISC-V ISA verification tests** as part of the project. The current repo does not include the official suite’s exact name/version, configuration, command, or a pass/fail transcript, so readers can see the testbench but cannot independently audit which official tests passed. The checked-in `tb/ISA_TESTS/test_rv32i_full.S` is a separate project-directed program—not the official suite—and covers shifts, JAL/JALR, and word/halfword/byte loads with signed and unsigned extension. See [Verification notes](docs/verification.md) for the distinction and current evidence.
 
 ## Directed pipeline simulation
 
