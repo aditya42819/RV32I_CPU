@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 module victim_cache #(
-    parameter DEPTH = 2,
+    parameter DEPTH = 4,
     parameter TAG_W = 24
 )(
     input  logic                 clk, rst_n,
